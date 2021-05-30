@@ -17,6 +17,8 @@ class Puzzle {
 public:
   Puzzle(size_t size);
   ~Puzzle();
+  Puzzle(const Puzzle& puzzle);
+  Puzzle& operator=(const Puzzle& puzzle);
 
   bool is_solvable() const;
   bool is_solved() const;

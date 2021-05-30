@@ -14,10 +14,14 @@ int main() {
   // Seed for randomness.
   srand((unsigned int)time(NULL));
 
-  Puzzle puzzle(2);
+  size_t size = 3;
+  Puzzle puzzle(size);
+  while (!puzzle.is_solvable()) {
+    puzzle = Puzzle(size);
+  }
   puzzle.print();
 
-  std::cout << std::boolalpha;
+  std::cout << std::boolalpha << std::endl;
   std::cout << "Is solvable?\t" << puzzle.is_solvable() << std::endl;
 
   while (!puzzle.is_solved()) {
@@ -43,7 +47,8 @@ int main() {
     std::cout << std::endl;
   }
 
-  std::cout << std::endl << "Solved!" << std::endl;
+  std::cout << std::endl;
+  puzzle.print();
 
   return 0;
 }

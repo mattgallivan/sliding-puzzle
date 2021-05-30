@@ -28,6 +28,26 @@ Puzzle::Puzzle(size_t size) {
 
 Puzzle::~Puzzle() { delete[] board; }
 
+Puzzle::Puzzle(const Puzzle& puzzle) {
+  width = puzzle.width;
+  height = puzzle.height;
+  board = new size_t[width * height];
+  for (size_t i = 0; i < width * height; ++i)
+    board[i] = puzzle.board[i];
+}
+
+Puzzle& Puzzle::operator=(const Puzzle& puzzle) {
+  if (this != &puzzle) {
+    delete[] board;
+    width = puzzle.width;
+    height = puzzle.height;
+    board = new size_t[width * height];
+    for (size_t i = 0; i < width * height; ++i)
+      board[i] = puzzle.board[i];
+  }
+  return *this;
+}
+
 bool Puzzle::is_solvable() const {
   // Solvability: https://mathworld.wolfram.com/15Puzzle.html
   size_t parity = 0;
