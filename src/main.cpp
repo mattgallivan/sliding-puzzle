@@ -5,8 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 
-int main() {
-  // Seed for randomness.
+int main() { // Seed for randomness.
   srand((unsigned int)time(NULL));
 
   Puzzle puzzle(2);
