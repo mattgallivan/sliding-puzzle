@@ -43,7 +43,6 @@ public:
 
 private:
   size_t index_of(size_t tile) const;
-
   void swap(size_t ra, size_t ca, size_t rb, size_t cb);
 };
 
