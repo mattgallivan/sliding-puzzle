@@ -37,7 +37,7 @@ std::vector<Action> AStar::solve(Puzzle puzzle) {
   // The initial heuristic of the start state.
   size_t start_h = manhattan_distance(start);
 
-  // The open list is a frontier of states to expanded ordered from lowest to
+  // The open list is a frontier of states to expand ordered from lowest to
   // highest by their f-score.
   typedef std::pair<size_t, Puzzle> FPuzzle;
   std::priority_queue<FPuzzle, std::vector<FPuzzle>, std::greater<>> open;
