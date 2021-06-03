@@ -5,15 +5,12 @@
 
 #include "puzzle.h"
 
+#include <array>
 #include <iostream>
-#include <vector>
-
-const size_t BLANK = 0; // The representation of the empty tile.
 
 Puzzle::Puzzle(size_t size) {
   width = size;
   height = size;
-  board = new size_t[width * height];
 
   // Randomly place the tiles on the board.
   std::vector<size_t> tiles;
@@ -21,31 +18,46 @@ Puzzle::Puzzle(size_t size) {
     tiles.push_back(i);
   for (size_t i = 0; i < width * height; ++i) {
     size_t index = rand() % tiles.size();
-    board[i] = tiles[index];
+    board.push_back(tiles[index]);
     tiles.erase(tiles.begin() + index);
   }
 }
 
-Puzzle::~Puzzle() { delete[] board; }
-
-Puzzle::Puzzle(const Puzzle& puzzle) {
-  width = puzzle.width;
-  height = puzzle.height;
-  board = new size_t[width * height];
-  for (size_t i = 0; i < width * height; ++i)
-    board[i] = puzzle.board[i];
+bool Puzzle::operator==(const Puzzle& puzzle) const {
+  return board == puzzle.board;
 }
 
-Puzzle& Puzzle::operator=(const Puzzle& puzzle) {
-  if (this != &puzzle) {
-    delete[] board;
-    width = puzzle.width;
-    height = puzzle.height;
-    board = new size_t[width * height];
-    for (size_t i = 0; i < width * height; ++i)
-      board[i] = puzzle.board[i];
+bool Puzzle::operator!=(const Puzzle& puzzle) const {
+  return board != puzzle.board;
+}
+
+bool Puzzle::operator<(const Puzzle& puzzle) const {
+  if (width < puzzle.width || height < puzzle.height)
+    return true;
+  for (size_t i = 0; i < width * height; ++i) {
+    if (board[i] < puzzle.board[i])
+      return true;
+    else if (board[i] > puzzle.board[i])
+      return false;
   }
-  return *this;
+  return false;
+}
+
+std::vector<Action> Puzzle::actions() const {
+  size_t index = index_of(BLANK);
+  size_t row = index / width;
+  size_t col = index % width;
+
+  std::vector<Action> actions;
+  if (col > 0)
+    actions.push_back(LEFT);
+  if (col < width - 1)
+    actions.push_back(RIGHT);
+  if (row > 0)
+    actions.push_back(UP);
+  if (row < height - 1)
+    actions.push_back(DOWN);
+  return actions;
 }
 
 bool Puzzle::is_solvable() const {
@@ -138,4 +150,12 @@ void Puzzle::swap(size_t ra, size_t ca, size_t rb, size_t cb) {
   size_t tmp = board[idxa];
   board[idxa] = board[idxb];
   board[idxb] = tmp;
+}
+
+size_t PuzzleHash::operator()(const Puzzle& puzzle) const {
+  size_t hash = 0;
+  for (size_t i = 0; i < puzzle.width * puzzle.height; ++i) {
+    hash += i * puzzle.board[i];
+  }
+  return hash;
 }
