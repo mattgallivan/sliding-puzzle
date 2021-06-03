@@ -86,7 +86,5 @@ std::vector<Action> AStar::solve(Puzzle puzzle) {
     }
   }
 
-  std::cout << "Done?" << std::endl;
-
   return {};
 }
