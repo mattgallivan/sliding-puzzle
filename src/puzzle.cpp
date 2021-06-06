@@ -151,11 +151,3 @@ void Puzzle::swap(size_t ra, size_t ca, size_t rb, size_t cb) {
   board[idxa] = board[idxb];
   board[idxb] = tmp;
 }
-
-size_t PuzzleHash::operator()(const Puzzle& puzzle) const {
-  size_t hash = 0;
-  for (size_t i = 0; i < puzzle.width * puzzle.height; ++i) {
-    hash += i * puzzle.board[i];
-  }
-  return hash;
-}

@@ -44,15 +44,15 @@ std::vector<Action> AStar::solve(Puzzle puzzle) {
   open.push(std::make_pair(start_h, start));
 
   // The g-scores represent the minimum travel cost to a state.
-  std::unordered_map<Puzzle, size_t, PuzzleHash> g;
+  std::map<Puzzle, size_t> g;
   g[start] = 0;
 
   // The f-scores represent the minimum total cost to a state.
-  std::unordered_map<Puzzle, size_t, PuzzleHash> f;
+  std::map<Puzzle, size_t> f;
   f[start] = start_h;
 
   // The states leading to other states, used to rebuild the path.
-  std::unordered_map<Puzzle, std::pair<Puzzle, Action>, PuzzleHash> parents;
+  std::map<Puzzle, std::pair<Puzzle, Action>> parents;
 
   while (!open.empty()) {
     auto current = open.top().second;

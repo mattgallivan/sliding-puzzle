@@ -22,8 +22,6 @@ static std::map<Action, std::string> action_strings = {
 };
 
 class Puzzle {
-  friend class PuzzleHash;
-
 public:
   size_t width, height;
   std::vector<size_t> board;
@@ -45,11 +43,6 @@ private:
   size_t index_of(size_t tile) const;
 
   void swap(size_t ra, size_t ca, size_t rb, size_t cb);
-};
-
-class PuzzleHash {
-public:
-  size_t operator()(const Puzzle& puzzle) const;
 };
 
 #endif /* PUZZLE_H */
