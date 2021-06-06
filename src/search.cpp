@@ -88,3 +88,49 @@ std::vector<Action> AStar::solve(Puzzle puzzle) {
 
   return {};
 }
+
+static size_t ida_search(std::vector<Action>& actions,
+                         std::vector<Puzzle>& states, size_t g, size_t bound) {
+  Puzzle state = states.back();
+  if (state.is_solved())
+    return 0;
+
+  size_t f = uadd(g, manhattan_distance(state));
+  if (f > bound)
+    return f;
+
+  size_t minimum = SIZE_MAX;
+  for (Action action : state.actions()) {
+    Puzzle neighbour = state;
+    neighbour.move(action);
+
+    if (std::find(states.begin(), states.end(), neighbour) == states.end()) {
+      actions.push_back(action);
+      states.push_back(neighbour);
+      // NOTE: Move cost is always 1.
+      size_t t = ida_search(actions, states, uadd(g, 1), bound);
+      if (t == 0)
+        return 0;
+      if (t < minimum)
+        minimum = t;
+      states.pop_back();
+      actions.pop_back();
+    }
+  }
+  return minimum;
+}
+
+std::vector<Action> IDAStar::solve(Puzzle puzzle) {
+  Puzzle start = puzzle;
+
+  std::vector<Action> actions;
+  std::vector<Puzzle> states;
+  states.push_back(puzzle);
+
+  size_t bound = manhattan_distance(start);
+  while (bound != 0 && bound != SIZE_MAX) {
+    bound = ida_search(actions, states, 0, bound);
+  }
+
+  return actions;
+}

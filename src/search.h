@@ -15,4 +15,9 @@ public:
   std::vector<Action> solve(Puzzle puzzle);
 };
 
+class IDAStar {
+public:
+  std::vector<Action> solve(Puzzle puzzle);
+};
+
 #endif /* SEARCH_H */

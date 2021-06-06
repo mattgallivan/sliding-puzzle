@@ -68,7 +68,7 @@ bool Puzzle::is_solvable() const {
     size_t tile = board[i];
     // We note the blank's row for the last calculation.
     if (tile == BLANK) {
-      blank_row = height - (i / width) - 1;
+      blank_row = height - i / width;
       continue;
     }
     if (tile == 1)
@@ -81,7 +81,13 @@ bool Puzzle::is_solvable() const {
         parity++;
     }
   }
-  return (parity + blank_row) % 2 == 0;
+
+  if (width % 2 == 1)
+    return parity % 2 == 0;
+  else if (blank_row % 2 == 0)
+    return parity % 2 == 1;
+  else
+    return parity % 2 == 0;
 }
 
 bool Puzzle::is_solved() const {
