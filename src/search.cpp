@@ -11,7 +11,7 @@
 #include <queue>
 #include <unordered_map>
 
-static size_t uadd(size_t a, size_t b) { return a + b > a ? a + b : SIZE_MAX; }
+static size_t uadd(size_t a, size_t b) { return a + b >= a ? a + b : SIZE_MAX; }
 
 std::vector<Action> AStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
   Puzzle start = puzzle;
