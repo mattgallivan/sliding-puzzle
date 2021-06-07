@@ -12,12 +12,17 @@
 
 class AStar {
 public:
-  std::vector<Action> solve(Puzzle puzzle);
+  std::vector<Action> solve(Puzzle puzzle, size_t (*heuristic)(Puzzle));
 };
 
 class IDAStar {
 public:
-  std::vector<Action> solve(Puzzle puzzle);
+  std::vector<Action> solve(Puzzle puzzle, size_t (*heuristic)(Puzzle));
+};
+
+class LRTAStar {
+public:
+  std::vector<Action> solve(Puzzle puzzle, size_t (*heuristic)(Puzzle));
 };
 
 #endif /* SEARCH_H */

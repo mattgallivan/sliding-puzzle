@@ -13,29 +13,11 @@
 
 static size_t uadd(size_t a, size_t b) { return a + b > a ? a + b : SIZE_MAX; }
 
-static size_t manhattan_distance(Puzzle puzzle) {
-  size_t distance = 0;
-  for (size_t i = 0; i < puzzle.width * puzzle.height; ++i) {
-    size_t tile = puzzle.board[i];
-    size_t position = i + 1;
-    if (tile == BLANK)
-      continue;
-    if (tile == position)
-      continue;
-    // NOTE: Two cases here to prevent underflow.
-    if (tile > position)
-      distance += tile - position;
-    if (tile < position)
-      distance += position - tile;
-  }
-  return distance;
-}
-
-std::vector<Action> AStar::solve(Puzzle puzzle) {
+std::vector<Action> AStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
   Puzzle start = puzzle;
 
   // The initial heuristic of the start state.
-  size_t start_h = manhattan_distance(start);
+  size_t start_h = heuristic(start);
 
   // The open list is a frontier of states to expand ordered from lowest to
   // highest by their f-score.
@@ -79,7 +61,7 @@ std::vector<Action> AStar::solve(Puzzle puzzle) {
       size_t cost = uadd(g[current], 1); // NOTE: Move cost is always 1.
       if (cost < g[neighbour]) {
         g[neighbour] = cost;
-        f[neighbour] = uadd(cost, manhattan_distance(neighbour));
+        f[neighbour] = uadd(cost, heuristic(neighbour));
         open.push(std::make_pair(f[neighbour], neighbour));
         parents.insert_or_assign(neighbour, std::make_pair(current, action));
       }
@@ -90,12 +72,13 @@ std::vector<Action> AStar::solve(Puzzle puzzle) {
 }
 
 static size_t ida_search(std::vector<Action>& actions,
-                         std::vector<Puzzle>& states, size_t g, size_t bound) {
+                         std::vector<Puzzle>& states, size_t g, size_t bound,
+                         size_t (*heuristic)(Puzzle)) {
   Puzzle state = states.back();
   if (state.is_solved())
     return 0;
 
-  size_t f = uadd(g, manhattan_distance(state));
+  size_t f = uadd(g, heuristic(state));
   if (f > bound)
     return f;
 
@@ -108,7 +91,7 @@ static size_t ida_search(std::vector<Action>& actions,
       actions.push_back(action);
       states.push_back(neighbour);
       // NOTE: Move cost is always 1.
-      size_t t = ida_search(actions, states, uadd(g, 1), bound);
+      size_t t = ida_search(actions, states, uadd(g, 1), bound, heuristic);
       if (t == 0)
         return 0;
       if (t < minimum)
@@ -120,17 +103,49 @@ static size_t ida_search(std::vector<Action>& actions,
   return minimum;
 }
 
-std::vector<Action> IDAStar::solve(Puzzle puzzle) {
+std::vector<Action> IDAStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
   Puzzle start = puzzle;
 
   std::vector<Action> actions;
   std::vector<Puzzle> states;
   states.push_back(puzzle);
 
-  size_t bound = manhattan_distance(start);
+  size_t bound = heuristic(start);
   while (bound != 0 && bound != SIZE_MAX) {
-    bound = ida_search(actions, states, 0, bound);
+    bound = ida_search(actions, states, 0, bound, heuristic);
   }
 
+  return actions;
+}
+
+std::vector<Action> LRTAStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
+  std::map<Puzzle, size_t> h;
+  std::vector<Action> actions;
+  Puzzle state = puzzle;
+  while (!state.is_solved()) {
+    // Planning
+    size_t min_f = SIZE_MAX;
+    Puzzle next_state = state;
+    Action next_action;
+    for (Action action : state.actions()) {
+      Puzzle neighbour = state;
+      neighbour.move(action);
+      if (h.find(neighbour) == h.end())
+	h[neighbour] = heuristic(neighbour);
+      // NOTE: Move cost is always 1.
+      size_t f = 1 + h[neighbour];
+      if (f < min_f) {
+	next_state = neighbour;
+	next_action = action;
+	min_f = f;
+      }
+    }
+    // Learning
+    if (min_f > h[state])
+      h[state] = min_f;
+    // Acting
+    state = next_state;
+    actions.push_back(next_action);
+  }
   return actions;
 }

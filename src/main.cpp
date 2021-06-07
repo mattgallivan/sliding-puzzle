@@ -3,6 +3,7 @@
  * terms of the MIT license.
  */
 
+#include "heuristics.h"
 #include "puzzle.h"
 #include "search.h"
 
@@ -13,13 +14,11 @@
 
 int main() {
   // Seed for randomness.
-  // srand((unsigned int)time(NULL));
+  srand((unsigned int)time(NULL));
 
   size_t size = 4;
 
-  for (size_t i = 0; i < 10; ++i) {
-    srand(i);
-
+  for (size_t i = 0; i < 1; ++i) {
     std::cout << "Starting..." << std::endl;
 
     Puzzle puzzle(size);
@@ -30,14 +29,14 @@ int main() {
     std::cout << std::endl;
     puzzle.print();
 
-    IDAStar search;
-    std::vector<Action> actions = search.solve(puzzle);
+    LRTAStar search;
+    std::vector<Action> actions = search.solve(puzzle, manhattan);
     for (auto action : actions) {
       puzzle.move(action);
     }
 
     if (actions.size() == 0) {
-      std::cout << std::endl << "\t...Failed!" << std::endl << std::endl;
+      std::cout << std::endl << "\t...Failed!" << std::endl;
       return 1;
     } else {
       std::cout << std::endl
