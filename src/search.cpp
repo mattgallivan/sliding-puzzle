@@ -37,6 +37,17 @@ std::vector<Action> AStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
   std::map<Puzzle, std::pair<Puzzle, Action>> parents;
 
   while (!open.empty()) {
+    if (stats) {
+      size_t total_bytes = 0;
+      total_bytes = uadd(total_bytes, open.size() * sizeof(FPuzzle));
+      total_bytes =
+          uadd(total_bytes, g.size() * (sizeof(Puzzle) + sizeof(size_t)));
+      total_bytes =
+          uadd(total_bytes, f.size() * (sizeof(Puzzle) + sizeof(size_t)));
+      stats->mem_bytes = std::max(stats->mem_bytes, total_bytes);
+      stats->num_expansions++;
+    }
+
     auto current = open.top().second;
     open.pop();
 
@@ -73,7 +84,13 @@ std::vector<Action> AStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
 
 static size_t ida_search(std::vector<Action>& actions,
                          std::vector<Puzzle>& states, size_t g, size_t bound,
-                         size_t (*heuristic)(Puzzle)) {
+                         size_t (*heuristic)(Puzzle), Statistics* stats) {
+  if (stats) {
+    size_t bytes = states.size() * sizeof(Puzzle);
+    stats->mem_bytes = std::max(stats->mem_bytes, bytes);
+    stats->num_expansions++;
+  }
+
   Puzzle state = states.back();
   if (state.is_solved())
     return 0;
@@ -91,7 +108,8 @@ static size_t ida_search(std::vector<Action>& actions,
       actions.push_back(action);
       states.push_back(neighbour);
       // NOTE: Move cost is always 1.
-      size_t t = ida_search(actions, states, uadd(g, 1), bound, heuristic);
+      size_t t =
+          ida_search(actions, states, uadd(g, 1), bound, heuristic, stats);
       if (t == 0)
         return 0;
       if (t < minimum)
@@ -112,17 +130,24 @@ std::vector<Action> IDAStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
 
   size_t bound = heuristic(start);
   while (bound != 0 && bound != SIZE_MAX) {
-    bound = ida_search(actions, states, 0, bound, heuristic);
+    bound = ida_search(actions, states, 0, bound, heuristic, stats);
   }
 
   return actions;
 }
 
-std::vector<Action> LRTAStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) {
+std::vector<Action> LRTAStar::solve(Puzzle puzzle,
+                                    size_t (*heuristic)(Puzzle)) {
   std::map<Puzzle, size_t> h;
   std::vector<Action> actions;
   Puzzle state = puzzle;
   while (!state.is_solved()) {
+    if (stats) {
+      size_t bytes = h.size() * (sizeof(Puzzle) + sizeof(size_t));
+      stats->mem_bytes = std::max(stats->mem_bytes, bytes);
+      stats->num_expansions++;
+    }
+
     // Planning
     size_t min_f = SIZE_MAX;
     Puzzle next_state = state;
@@ -131,13 +156,13 @@ std::vector<Action> LRTAStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) 
       Puzzle neighbour = state;
       neighbour.move(action);
       if (h.find(neighbour) == h.end())
-	h[neighbour] = heuristic(neighbour);
+        h[neighbour] = heuristic(neighbour);
       // NOTE: Move cost is always 1.
       size_t f = 1 + h[neighbour];
       if (f < min_f) {
-	next_state = neighbour;
-	next_action = action;
-	min_f = f;
+        next_state = neighbour;
+        next_action = action;
+        min_f = f;
       }
     }
     // Learning
@@ -147,5 +172,6 @@ std::vector<Action> LRTAStar::solve(Puzzle puzzle, size_t (*heuristic)(Puzzle)) 
     state = next_state;
     actions.push_back(next_action);
   }
+
   return actions;
 }

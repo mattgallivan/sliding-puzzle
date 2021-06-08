@@ -7,21 +7,37 @@
 #define SEARCH_H
 
 #include "puzzle.h"
+#include "stats.h"
 
 #include <vector>
 
-class AStar {
-public:
+struct AStar {
+  std::string name = "A*";
+  Statistics* stats = NULL;
+
+  AStar(){};
+  AStar(Statistics* stats) : stats(stats){};
+
   std::vector<Action> solve(Puzzle puzzle, size_t (*heuristic)(Puzzle));
 };
 
-class IDAStar {
-public:
+struct IDAStar {
+  std::string name = "IDA*";
+  Statistics* stats = NULL;
+
+  IDAStar(){};
+  IDAStar(Statistics* stats) : stats(stats){};
+
   std::vector<Action> solve(Puzzle puzzle, size_t (*heuristic)(Puzzle));
 };
 
-class LRTAStar {
-public:
+struct LRTAStar {
+  std::string name = "LRTA*";
+  Statistics* stats = NULL;
+
+  LRTAStar(){};
+  LRTAStar(Statistics* stats) : stats(stats){};
+
   std::vector<Action> solve(Puzzle puzzle, size_t (*heuristic)(Puzzle));
 };
 
